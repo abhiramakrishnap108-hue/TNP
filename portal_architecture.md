@@ -1,59 +1,105 @@
 # NIT Puducherry Placement Portal Architecture
 
-The placement portal is structured as a client-side state-driven Single Page Application (SPA) within a single file (`index.tsx`). Navigation and page transitions are controlled via React state variables instead of a traditional router.
+The placement portal is structured as a modular **Next.js** application. State management, authentication, routing, and user interface layers are separated into clean, modular components, contexts, and features.
 
 ---
 
-## 1. Core Navigation & Routing Logic
+## 1. Project Directory Structure
 
-The interface renders sections conditionally based on two main state variables:
-- `activeTab`: Controls which main page is active (`"home" | "statistics" | "collaborations" | "contact" | "dashboard"`).
-- `isLoggedIn` & `userRoleState`: Restricts access to student, PR, or departmental dashboards.
+The codebase is organized as follows:
 
-```mermaid
-graph TD
-    A[Visitor Access] --> B{activeTab}
-    B -->|"home"| C[Home Landing & Recruiters Grid]
-    B -->|"statistics"| D[Placement Charts & Package Stats]
-    B -->|"collaborations"| E[Corporate & Academic Partners]
-    B -->|"contact"| F[Contact Details & Maps]
-    B -->|"dashboard"| G{Logged In?}
-    G -->|No| H[Show Login Prompt]
-    G -->|Yes| I{userRoleState}
-    I -->|student| J[Student Dashboard]
-    I -->|pr| K[PR / Placement Coordinator Dashboard]
-    I -->|departmental| L[Departmental Representative Dashboard]
+```
+├── app/
+│   ├── globals.css          # Main stylesheet containing glassmorphism design tokens
+│   ├── layout.tsx           # Next.js root layout initializing fonts, scripts, and body wrappers
+│   └── page.tsx             # Unified root router orchestrating navbar, particle background, and dashboards
+├── components/
+│   ├── AccountModal.tsx     # Modal to configure passwords and session logouts
+│   ├── CompanyDetailsModal.tsx # Recruiter detail insights and past student reviews
+│   ├── Footer.tsx           # Persistent portal footer component
+│   ├── Navbar.tsx           # Global responsive navigation header
+│   ├── ParticleBackground.tsx # Dynamic HTML5 Canvas particle background effect
+│   ├── PlacedDirectory.tsx  # Searchable directory showing placements with bulk CSV upload
+│   ├── PrsManagement.tsx   # Panel to manage PR representatives roster
+│   └── Toast.tsx            # Floating custom toast notification alerts stack
+├── context/
+│   ├── AuthContext.tsx      # Global auth context managing session roles, forms, and hash-routing
+│   └── DataContext.tsx      # Global data context managing database lists and mutations (CRUD)
+├── features/
+│   ├── admin/
+│   │   └── AdminDashboard.tsx         # Account activation settings and audit trail logging
+│   ├── departmental/
+│   │   └── DepartmentalDashboard.tsx  # Departmental student registry and academic metrics
+│   ├── pr/
+│   │   └── PrDashboard.tsx            # Drives manager, placement calendar scheduler, and student verification
+│   ├── student/
+│   │   └── StudentDashboard.tsx       # Student profile, resume ATS scoring, and technical prep sandbox
+│   └── visitor/
+│   │   └── VisitorLanding.tsx         # Landing page hero slider, metrics counters, and recruiter logomarks
+├── mock/
+│   └── database.ts          # Central mock database seeding users, students, companies, and logs
+└── types/
+    └── index.ts             # Strongly typed TypeScript interfaces mapping all database entity shapes
 ```
 
 ---
 
-## 2. Dashboard Sub-Routing & Views
+## 2. Core State Management & Context Architecture
 
-Once authenticated and redirected to `activeTab === "dashboard"`, each user role accesses a specialized menu driven by sub-tab state hooks:
+The application state is split into two specialized Context Providers:
 
-### A. Student Dashboard (`studentDashTab` state)
-- **Profile Tab (`"profile"`)**: Displays summary stats, academic summary (CGPA, roll number), personal details, achievements, and the newly updated state-bound status settings form.
-- **Companies Tab (`"companies"`)**: Displays job openings, application status, minimum CGPA rules, and eligibility checks (including blocking placed students).
-- **Schedule Tab (`"schedule"`)**: Lists upcoming events, registration forms, and interview locations.
-- **Preparation Tab (`"preparation"`)**: Interactive prep materials and launchpads for coding assessments.
-- **Resume ATS (`"resume-ats"`)**: Evaluates resumes against job descriptions, grading key skills and formatting.
+### A. AuthContext (`context/AuthContext.tsx`)
+- Manages user login sessions, active role selection states, and navigation routes.
+- Integrates a custom React `useEffect` listener to synchronize browser URL hashes (`#/home`, `#/dashboard`, etc.) with the `activeTab` navigation state.
+- Exposes login submission, logout, and simulated OTP recovery step handlers.
 
-### B. Placement Representative (PR) Dashboard (`prDashTab` state)
-- **Drives Manager (`"companies"`)**: Allows coordinators to create and edit company packages, average offers, and eligibility CGPA thresholds.
-- **Schedule Manager (`"schedule"`)**: Publishes campus events, talks, and test dates.
-- **Student Verification (`"students"`)**: Lists all registered candidates; allows PRs to toggle individual eligibility status.
-- **Analytics (`"stats"`)**: Department-wise placement rate charts.
-
-### C. Departmental Coordinator Dashboard (`departmentalDashTab` state)
-- **Student Registry (`"students"`)**: Read-only directory of departmental student profile cards.
-- **Academic Charts (`"stats"`)**: Aggregated visual trackers monitoring averages and year-over-year progression.
+### B. DataContext (`context/DataContext.tsx`)
+- Hydrates the application databases (`users`, `students`, `companies`, `jobRoles`, `applications`, `interviews`, `events`, `prs`, `editLogs`, `eventLogs`) from seed records in `mock/database.ts`.
+- Manages global mutations (applying to drives, updating application status, editing/deleting companies, scheduling events, importing student records, and adding PRs).
+- Controls the floating UI toast notifications stack (`toasts`, `addToast`, `removeToast`).
 
 ---
 
-## 3. Interactive Overlays & Modals
+## 3. Component Orchestration & Routing Workflow
 
-Modals are managed as overlay portals rendering at the root DOM level based on active state variables:
-1. **Login Overlay (`isLoginOpen`)**: Toggles credentials verification panels for Students, PRs, and Faculty.
-2. **Account Settings (`isAccountModalOpen`)**: Configures login email/passwords and logs out sessions.
-3. **Assessment Test System (`isMockTestOpen`)**: Runs the timed interactive mock technical/aptitude test sessions.
-4. **Company Details Modal (`selectedCompanyDetails`)**: Displays recruiter overview, selection stages, and interview sample questions.
+The root component at `app/page.tsx` serves as the application shell and handles view dispatching under the Data and Auth providers:
+
+```mermaid
+graph TD
+    Root[app/page.tsx Router Shell] --> AuthCtx[AuthContext Provider]
+    Root --> DataCtx[DataContext Provider]
+    AuthCtx --> Nav[Navbar Component]
+    AuthCtx --> Bg[ParticleBackground Component]
+    AuthCtx --> RouteCheck{isLoggedIn & activeTab}
+    
+    RouteCheck -->|activeTab === "home/stats/contact"| Visitor[VisitorLanding Feature]
+    RouteCheck -->|activeTab === "dashboard" & STUDENT| StudentDash[StudentDashboard Feature]
+    RouteCheck -->|activeTab === "dashboard" & PR_COORDINATOR| PRDash[PrDashboard Feature]
+    RouteCheck -->|activeTab === "dashboard" & DEPT_COORDINATOR| DeptDash[DepartmentalDashboard Feature]
+    RouteCheck -->|activeTab === "dashboard" & ADMIN| AdminDash[AdminDashboard Feature]
+```
+
+---
+
+## 4. Sub-Dashboard Features & Layout
+
+Once routed to the dashboard, components isolate views using role-specific tabs:
+
+1. **Student Dashboard (`StudentDashboard.tsx`):**
+   - **Profile Tab:** Real-time stats card and phone/resume update forms.
+   - **Job Drives Tab:** Active recruitments filterable by CGPA thresholds.
+   - **Applications Tab:** Tracking individual pipeline stages (Applied -> Shortlisted -> Hired).
+   - **Event Schedule Tab:** Lists calendar drive postings and RSVP actions.
+   - **Sandbox Tab:** A preparation area containing the compiler emulator, technical mock exams, and webcam mock interview diagnostic recorder.
+   - **ATS Resume Tab:** Diagnostic parser providing match scoring and optimization advice.
+2. **Placement Representative Dashboard (`PrDashboard.tsx`):**
+   - **Active Drives Tab:** Form to add/edit recruiter packages and criteria.
+   - **Event Scheduler Tab:** Admin calendar to publish venue details.
+   - **PR Force Management Tab:** Roster manager for departmental representatives.
+   - **Placed Directory Tab:** Searchable placement registry.
+3. **Departmental Coordinator Dashboard (`DepartmentalDashboard.tsx`):**
+   - **Student Registry Tab:** Department-wise student directory.
+   - **System Metrics Tab:** Charts tracking median packages and placement rates.
+4. **Admin Dashboard (`AdminDashboard.tsx`):**
+   - **User Accounts Tab:** Activates/deactivates user credentials.
+   - **Change Logs Tab:** Edit/Event audit trails logging administrative activity.

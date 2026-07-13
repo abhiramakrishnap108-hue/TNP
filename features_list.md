@@ -5,15 +5,26 @@ This document lists all active and interactive features implemented in the NIT P
 
 ---
 
-### 1. General & Visitor Interface Features
-- **Key Statistics Counter**: Dynamic cards showcasing placement performance (e.g., *16.0 LPA Highest Package*, *10.8 LPA Average Package*, *85% Students Placed*, *50+ Active Recruiters*).
+### 1. General & Visitor Interface Features (Unauthenticated vs. Authenticated Restrictions)
+- **Key Statistics Counter**: Dynamic cards showcasing placement performance (e.g., *16.0 LPA Highest Package*, *10.8 LPA Average Package*, *85% Students Placed*, *50+ Active Recruiters*). Available to all.
 - **Testimonial Carousel**:
   - Interactive slider showcasing student success stories.
-  - Video play overlays linking to simulated video testimonials.
+  - Video play overlays linking to simulated video testimonials. Available to all.
 - **Interactive Graphs (Statistics Tab)**:
   - Sector-wise hiring distribution.
-  - Average package comparison by department (CSE, ECE, EEE, Mech, Civil).
-- **Recruiter Grid**: Filtering and search capabilities for partner corporate organizations.
+  - Average package comparison by department (CSE, ECE, EEE, Mech, Civil). Available to all.
+- **Recruiter Grid**:
+  - **Unauthenticated / Guests**: See blurred package metrics (Max CTC, Min CGPA), locked cards, and a backdrop lock overlay. Hovering triggers a bouncing lock message. Clicking any card displays an "Auth Required" toast and launches the login modal.
+  - **Authenticated Users**: View CTC packages, eligibility CGPA requirements, sector filters, website links, and click cards to open recruiter insights modals.
+- **Pre-Placement, Internships & Alumni Guides**:
+  - **Unauthenticated / Guests**: Access to syllabus guidelines, internship guidelines, and alumni connection links are locked. Attempts to download or click them trigger an authentication notice and open the login dialog.
+  - **Authenticated Users**: Instantly trigger simulated downloads or redirect links.
+- **Events Calendar (Events Tab)**:
+  - **Unauthenticated / Guests**: Detailed recruitment schedules, pre-placement talks, and test venues are hidden behind a locked screen lock placeholder.
+  - **Authenticated Users**: Access a complete calendar, check event dates, and register/RSVP for specific recruitment drives.
+- **Team Logistics & Contacts (Team Tab)**:
+  - **Unauthenticated / Guests**: Faculty department coordinators' and Professor-in-charge's mobile and office telephone numbers are locked.
+  - **Authenticated Users**: View and click to call all contact phone numbers.
 
 ---
 
@@ -29,7 +40,7 @@ This document lists all active and interactive features implemented in the NIT P
 
 ---
 
-### 3. Student Dashboard Features
+### 3. Student Dashboard Features (Restricted to logged-in Students)
 - **Profile Manager**:
   - Real-time profile card containing CGPA, roll number, department, achievements, and certifications.
   - Form to update personal data (phone, profile photo, and external resume links).
@@ -47,7 +58,7 @@ This document lists all active and interactive features implemented in the NIT P
 
 ---
 
-### 4. Placement Representative (PR) Dashboard Features
+### 4. Placement Representative (PR) Dashboard Features (Restricted to logged-in PRs)
 - **Recruitment Drive Creator**: Add or update recruiter cards, packages, description, and CGPA requirements.
 - **Drive Coordinator Schedule Tool**: Create upcoming events, mock drives, pre-placement talks, and test venues.
 - **Student Verification Panel**: Access student files, view stats, and toggle eligibility (Enable/Disable placement eligibility).
@@ -55,13 +66,13 @@ This document lists all active and interactive features implemented in the NIT P
 
 ---
 
-### 5. Departmental Coordinator Dashboard Features
+### 5. Departmental Coordinator Dashboard Features (Restricted to logged-in Departmental reps)
 - **Departmental Student Profiles**: View-only records of students within their assigned department.
 - **Academic Performance Tracker**: Graphs of department-wide averages and placement statistics.
 
 ---
 
-### 6. Admin Dashboard Features
+### 6. Admin Dashboard Features (Restricted to logged-in Admins)
 - **User Directory**: List of all user credentials, emails, and roles.
 - **Account Status Toggles**: Instantly activate/deactivate accounts.
 - **System Audit Trail**:

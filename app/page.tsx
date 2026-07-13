@@ -19,6 +19,7 @@ import { AuthProvider, useAuth } from "../context/AuthContext";
 // Modular Components
 import ParticleBackground from "../components/ParticleBackground";
 import AccountModal from "../components/AccountModal";
+import Footer from "../components/Footer";
 
 // Modular Feature Dashboards
 import VisitorLanding from "../features/visitor/VisitorLanding";
@@ -43,7 +44,10 @@ function TNPPortalContent() {
   const { toasts, setToasts } = useData() as any;
 
   return (
-    <div className={`transition-colors duration-500 min-h-screen relative overflow-x-hidden ${theme === "light" ? "bg-white text-slate-900" : "bg-luna-950 text-slate-100"}`}>
+    <div className={`transition-colors duration-500 min-h-screen relative overflow-x-hidden ${theme === "light" ? "text-slate-900" : "text-slate-100"}`}>
+      {/* Global Background Layer */}
+      <div className={`fixed inset-0 z-[-2] transition-colors duration-500 ${theme === "light" ? "bg-white" : "bg-luna-950"}`} />
+
       {/* Interactive HTML5 Canvas Particle Background */}
       <ParticleBackground />
 
@@ -221,6 +225,44 @@ function TNPPortalContent() {
 
       {/* Main Layout Content Area */}
       <main className="relative z-10 pt-20">
+        {activeTab !== "home" && (
+          <div className="relative h-[35vh] min-h-[220px] flex items-center justify-center overflow-hidden border-b border-luna-300/10 z-10 bg-gradient-to-b from-luna-950 via-luna-900/50 to-luna-950">
+            {/* Subtle moving background blobs */}
+            <div className="absolute inset-0 bg-luna-950">
+              <div className="absolute w-[40vw] h-[40vw] rounded-full bg-luna-300/5 blur-[100px] -top-[10vw] -left-[10vw]"></div>
+              <div className="absolute w-[40vw] h-[40vw] rounded-full bg-luna-600/5 blur-[100px] -bottom-[10vw] -right-[10vw]"></div>
+              {/* Grid overlay for high-tech premium feel */}
+              <div className="absolute inset-0 bg-[radial-gradient(#ffffff03_1px,transparent_1px)] [background-size:16px_16px] opacity-60"></div>
+            </div>
+
+            <div className="relative z-10 text-center px-4 max-w-4xl pt-6">
+              <h1 className="text-3xl sm:text-5xl font-black font-sans tracking-tight text-white mb-3 bg-gradient-to-r from-luna-300 via-luna-50 to-luna-400 bg-clip-text text-transparent drop-shadow-md capitalize">
+                {activeTab === "team"
+                  ? "Our Placement Team"
+                  : activeTab === "contact"
+                    ? "Contact & FAQ Support"
+                    : activeTab === "about"
+                      ? "About T&P Cell"
+                      : activeTab === "vision"
+                        ? "Placement Cell Vision"
+                        : activeTab === "events"
+                          ? "Upcoming Events & Calendar"
+                          : activeTab === "dashboard"
+                            ? "Placement Portal Dashboard"
+                            : activeTab}
+              </h1>
+              <p className="text-[10px] sm:text-xs text-slate-300 font-bold tracking-[0.25em] uppercase max-w-2xl mx-auto">
+                {activeTab === "vision" && "Fostering strategic leadership and bridging the industrial-academic gap"}
+                {activeTab === "about" && "Aims, facilities, MoUs, and recruitment guidelines of the institute"}
+                {activeTab === "team" && "Dedicated faculty representatives and operations nurturing divisions"}
+                {activeTab === "events" && "Chronological calendar, mock drives, and corporate presentation schedules"}
+                {activeTab === "contact" && "Reach out to the placement desk, find driving routes, or view support questions"}
+                {activeTab === "dashboard" && `Logged in session: ${userName || "User"} (${(userRoleState || "Guest").toUpperCase()})`}
+              </p>
+            </div>
+          </div>
+        )}
+
         {activeTab === "dashboard" && isLoggedIn ? (
           <section id="portal-dashboard" className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {userRoleState === "student" && <StudentDashboard />}
@@ -229,7 +271,10 @@ function TNPPortalContent() {
             {userRoleState === "admin" && <AdminDashboard />}
           </section>
         ) : (
-          <VisitorLanding activeTab={activeTab} theme={theme} />
+          <>
+            <VisitorLanding activeTab={activeTab} theme={theme} />
+            <Footer />
+          </>
         )}
       </main>
 

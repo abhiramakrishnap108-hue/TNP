@@ -42,11 +42,14 @@ The system functions as a client-side and server-side ready Next.js dashboard ap
 ### 3. Specific Requirements
 #### 3.1 Functional Requirements
 
-##### 3.1.1 Visitor Module
+##### 3.1.1 Visitor Module & Access Control Restrictions
 - **Home Landing**: Display placement summary statistics, core recruiter logos, and carousel testimonials (with video/text reviews).
-- **Statistics**: Interactive placement rate charts, sector distributions, and salary packages.
-- **Collaborations**: Partner lists and recruitment history.
-- **Contact**: T&P coordinates, addresses, and maps.
+- **Statistics**: Interactive placement rate charts, sector distributions, and department salary comparisons.
+- **Collaborations / Recruiter Grid**: Displays active recruiting partners. Details (Max CTC package, minimum eligible CGPA) are blurred for guests. Hovering displays a Lock screen, and clicking triggers a warning toast prompting the user to login.
+- **Pre-Placement Resources**: Read syllabus links, internship download guides, and alumni network portals are locked for guest users.
+- **Calendar & Events**: The detailed schedule calendar is locked behind an authorization overlay. Guests must log in to view dates and venues.
+- **Contact & Team**: Professor-in-Charge and Departmental Coordinator contact telephone numbers are locked behind login blocks to protect faculty privacy.
+- **Logistics**: General travel connectivity and driving maps remain public.
 
 ##### 3.1.2 Authentication & Account Management
 - **Role-based Authentication**: Separate login states for Student, PR, Departmental, and Admin.

@@ -117,6 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         window.location.hash = "#/home";
         setActiveTabState("home");
       }
+      window.scrollTo({ top: 0, behavior: "instant" });
     };
 
     window.addEventListener("hashchange", handleHashChange);

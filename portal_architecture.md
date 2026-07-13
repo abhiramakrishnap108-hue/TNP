@@ -103,3 +103,6 @@ Once routed to the dashboard, components isolate views using role-specific tabs:
 4. **Admin Dashboard (`AdminDashboard.tsx`):**
    - **User Accounts Tab:** Activates/deactivates user credentials.
    - **Change Logs Tab:** Edit/Event audit trails logging administrative activity.
+5. **Visitor Landing Shell (`VisitorLanding.tsx`):**
+   - **Access Restriction Manager:** Enforces conditional rendering of data columns. Users who are not logged in have contact telephone links, syllabus files, and recruitment calendar timelines hidden or lock-protected.
+   - **Login Triggers:** Intercepts click events on protected components to launch the global authorization modal and broadcast alert notices.

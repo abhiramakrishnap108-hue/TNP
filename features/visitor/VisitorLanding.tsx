@@ -115,6 +115,27 @@ export default function VisitorLanding({ activeTab, theme }: VisitorLandingProps
     return () => clearInterval(interval);
   }, [activeTab]);
 
+  // Intersection Observer for scroll animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.05 }
+    );
+
+    const elements = document.querySelectorAll(".fade-in-on-scroll");
+    elements.forEach((el) => observer.observe(el));
+
+    return () => {
+      elements.forEach((el) => observer.unobserve(el));
+    };
+  }, [activeTab]);
+
   // Recruiter filtration
   const filteredRecruiters = companies.filter((company) => {
     const matchesSearch =
@@ -882,7 +903,15 @@ export default function VisitorLanding({ activeTab, theme }: VisitorLandingProps
                 .map((company) => (
                   <div
                     key={company.id}
-                    className="glass-panel p-6 rounded-3xl border border-white/5 hover:border-luna-300/40 hover:shadow-[0_0_20px_rgba(84,172,191,0.25)] hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between relative overflow-hidden"
+                    onClick={() => {
+                      if (isLoggedIn) {
+                        setSelectedCompanyDetails(company.name);
+                      } else {
+                        setIsLoginOpen(true);
+                        addToast("Authentication required to view recruiter details", "info");
+                      }
+                    }}
+                    className="group glass-panel p-6 rounded-3xl border border-white/5 hover:border-luna-300/40 hover:shadow-[0_0_20px_rgba(84,172,191,0.25)] hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between relative overflow-hidden cursor-pointer"
                   >
                     <div>
                       {/* Top banner accent based on company design branding */}
@@ -927,7 +956,8 @@ export default function VisitorLanding({ activeTab, theme }: VisitorLandingProps
                             href={company.website}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-luna-300 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer flex items-center justify-center"
+                            onClick={(e) => e.stopPropagation()}
+                            className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-luna-300 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer flex items-center justify-center z-20"
                             title="Visit Website"
                           >
                             <Globe size={13} />
@@ -935,15 +965,37 @@ export default function VisitorLanding({ activeTab, theme }: VisitorLandingProps
                         )}
 
                         <button
-                          onClick={() => setSelectedCompanyDetails(company.name)}
-                          className="flex-grow py-2.5 bg-white/5 hover:bg-luna-300 hover:text-luna-950 border border-white/10 hover:border-luna-300 text-slate-300 rounded-xl font-bold font-sans text-[10px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1 cursor-pointer"
+                          className="flex-grow py-2.5 bg-white/5 group-hover:bg-luna-300 group-hover:text-luna-950 border border-white/10 group-hover:border-luna-300 text-slate-300 rounded-xl font-bold font-sans text-[10px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1 cursor-pointer"
                         >
                           View Insights <ArrowRight size={11} />
                         </button>
                       </div>
                     </div>
+
+                    {/* Grid Hover tooltip detail info / Lock Overlay */}
+                    {isLoggedIn ? (
+                      <div className="absolute inset-0 bg-luna-950/95 flex flex-col justify-center items-center p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-center font-serif text-xs">
+                        <h5 className="font-bold text-sm text-luna-300 font-sans mb-2">{company.name} Highlights</h5>
+                        <p className="text-slate-200 mb-1">Max CTC: <strong>{company.maxPackage}</strong></p>
+                        <p className="text-slate-200 mb-1">Eligible: <strong>CSE, ECE, EEE</strong></p>
+                        <p className="text-slate-300 italic mt-2 text-[10px]">Click for interview insights & prep</p>
+                      </div>
+                    ) : (
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsLoginOpen(true);
+                          addToast("Authentication required to view recruiter details", "info");
+                        }}
+                        className="absolute inset-0 bg-luna-950/90 backdrop-blur-md flex flex-col justify-center items-center p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-center cursor-pointer"
+                      >
+                        <Lock size={20} className="text-luna-300 mb-2 animate-bounce" />
+                        <span className="text-[10px] uppercase font-bold tracking-wider text-white">Auth Required</span>
+                        <span className="text-[9px] text-slate-400 font-serif mt-1">Click to login & view CTC and package details</span>
+                      </div>
+                    )}
                   </div>
-                ))}
+                ))}`
               {filteredRecruiters.filter((c) => c.status === "active").length === 0 && (
                 <div className="col-span-full text-center py-16 text-slate-400 font-serif">
                   No recruiters match your active filters. Try adjustments.
